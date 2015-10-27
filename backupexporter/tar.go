@@ -4,6 +4,6 @@ import (
 	"os/exec"
 )
 
-func tarExecute(argument string) *exec.Cmd {
-	return exec.Command("tar", "zcf", "-", argument)
+func tarExecute(j JobConfig) *exec.Cmd {
+	return exec.Command("tar", "zcf", "-", j.Argument)
 }

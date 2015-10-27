@@ -15,17 +15,17 @@ const confFile = "backupexporter.yml"
 
 var job = flag.String("job", "", "Define the job to execute")
 
-func executeModule(module, argument string) *exec.Cmd {
-	switch module {
+func executeModule(j JobConfig) *exec.Cmd {
+	switch j.Module {
 	case "tar":
-		return tarExecute(argument)
+		return tarExecute(j)
 	}
-	log.Fatal("No module found for name ", module)
+	log.Fatal("No module found for name ", j.Module)
 	return nil
 }
 
 func executeJob(j JobConfig) {
-	c := executeModule(j.Module, j.Argument)
+	c := executeModule(j)
 	gpg := exec.Command("gpg", "-e", "--recipient", config.KeyID, "--trust-model", "always")
 	hash := sha256.New()
 
