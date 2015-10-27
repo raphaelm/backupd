@@ -1,7 +1,11 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"flag"
+	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -23,13 +27,17 @@ func executeModule(module, argument string) *exec.Cmd {
 func executeJob(j JobConfig) {
 	c := executeModule(j.Module, j.Argument)
 	gpg := exec.Command("gpg", "-e", "--recipient", config.KeyID, "--trust-model", "always")
+	hash := sha256.New()
 
 	gpg.Stdin, _ = c.StdoutPipe()
-	gpg.Stdout = os.Stdout
+	gpg.Stdout = io.MultiWriter(os.Stdout, hash)
 
 	gpg.Start()
 	c.Run()
 	gpg.Wait()
+
+	// Write checksum to stderr, as stdout is meant to be piped into a file
+	fmt.Fprintln(os.Stderr, hex.EncodeToString(hash.Sum(nil)))
 }
 
 func main() {
