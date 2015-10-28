@@ -31,10 +31,19 @@ func executeJob(j JobConfig) {
 
 	gpg.Stdin, _ = c.StdoutPipe()
 	gpg.Stdout = io.MultiWriter(os.Stdout, hash)
+	gpg.Stderr = os.Stderr
+	c.Stderr = c.Stderr
 
 	gpg.Start()
-	c.Run()
-	gpg.Wait()
+	if err := c.Run(); err != nil {
+		log.Fatal(err)
+		return
+	}
+	if err := gpg.Wait(); err != nil {
+		log.Fatal(err)
+		gpg.Wait()
+		return
+	}
 
 	// Write filename and checksum to stderr, as stdout is meant to be piped into a file
 	fmt.Fprintln(os.Stderr, "name:", fname)
