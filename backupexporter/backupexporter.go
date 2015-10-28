@@ -15,17 +15,17 @@ const confFile = "backupexporter.yml"
 
 var job = flag.String("job", "", "Define the job to execute")
 
-func executeModule(j JobConfig) *exec.Cmd {
+func executeModule(j JobConfig) (*exec.Cmd, string) {
 	switch j.Module {
 	case "tar":
 		return tarExecute(j)
 	}
 	log.Fatal("No module found for name ", j.Module)
-	return nil
+	return nil, ""
 }
 
 func executeJob(j JobConfig) {
-	c := executeModule(j)
+	c, fname := executeModule(j)
 	gpg := exec.Command("gpg", "-e", "--recipient", config.KeyID, "--trust-model", "always")
 	hash := sha256.New()
 
@@ -36,8 +36,9 @@ func executeJob(j JobConfig) {
 	c.Run()
 	gpg.Wait()
 
-	// Write checksum to stderr, as stdout is meant to be piped into a file
-	fmt.Fprintln(os.Stderr, hex.EncodeToString(hash.Sum(nil)))
+	// Write filename and checksum to stderr, as stdout is meant to be piped into a file
+	fmt.Fprintln(os.Stderr, "name:", fname)
+	fmt.Fprintln(os.Stderr, "checksum:", hex.EncodeToString(hash.Sum(nil)))
 }
 
 func main() {
@@ -56,5 +57,4 @@ func main() {
 		}
 	}
 	log.Fatal("No job configuration found for name ", *job)
-
 }
