@@ -5,6 +5,7 @@ PACKAGES = $(shell go list ./...)
 all: build
 
 deps:
+	go get -u "gopkg.in/yaml.v2"
 	go get -u "github.com/stretchr/testify/assert"
 
 backupd:
