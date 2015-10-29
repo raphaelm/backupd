@@ -32,7 +32,7 @@ func executeJob(j JobConfig) {
 	gpg.Stdin, _ = c.StdoutPipe()
 	gpg.Stdout = io.MultiWriter(os.Stdout, hash)
 	gpg.Stderr = os.Stderr
-	c.Stderr = c.Stderr
+	c.Stderr = os.Stderr
 
 	gpg.Start()
 	if err := c.Run(); err != nil {
