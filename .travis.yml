@@ -1,6 +1,5 @@
 language: go
 install:
-  - cd backupd
   - make deps
 script:
   - make check
