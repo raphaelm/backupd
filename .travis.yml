@@ -3,5 +3,5 @@ install:
   - cd backupd
   - make deps
 script:
-  - make test
+  - make check
 
