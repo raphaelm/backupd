@@ -15,6 +15,7 @@ import (
 // test code
 func runTestSuite(s datastore.DataStore, t *testing.T) {
 	testRemotes(s, t)
+	testJobs(s, t)
 }
 
 func testRemotes(s datastore.DataStore, t *testing.T) {
@@ -47,4 +48,43 @@ func testRemotes(s datastore.DataStore, t *testing.T) {
 
 	_, err = s.Remote(r.ID)
 	assert.NotNil(t, err)
+}
+
+func testJobs(s datastore.DataStore, t *testing.T) {
+	// Test only valid RemoteIDs are accepted
+	r := model.Job{JobName: "foo", RemoteId: 1}
+	created, err := s.SaveJob(&r)
+	assert.Equal(t, true, created)
+	assert.Nil(t, err)
+
+	r2, err := s.Job(r.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, r.JobName, r2.JobName)
+	assert.Equal(t, r.ID, r2.ID)
+
+	r2.JobName = "bar"
+	created, err = s.SaveJob(&r2)
+	assert.Equal(t, false, created)
+	assert.Nil(t, err)
+
+	rslice, err := s.Jobs()
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(rslice))
+	assert.Equal(t, r2.JobName, rslice[0].JobName)
+	assert.Equal(t, r2.ID, rslice[0].ID)
+
+	s.DeleteJob(&r2)
+
+	rslice, err = s.Jobs()
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(rslice))
+
+	_, err = s.Job(r.ID)
+	assert.NotNil(t, err)
+
+	testJobDeleteCascade(s, t)
+}
+
+func testJobDeleteCascade(s datastore.DataStore, t *testing.T) {
+
 }
