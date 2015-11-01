@@ -10,12 +10,14 @@ type mockStore struct {
 	idCounter int64
 	remotes   map[int64]model.Remote
 	jobs      map[int64]model.Job
+	backups   map[int64]model.Backup
 }
 
 func MockStore() *mockStore {
 	s := mockStore{}
 	s.remotes = make(map[int64]model.Remote)
 	s.jobs = make(map[int64]model.Job)
+	s.backups = make(map[int64]model.Backup)
 	return &s
 }
 
@@ -74,6 +76,13 @@ func (s *mockStore) SaveJob(job *model.Job) (created bool, err error) {
 }
 
 func (s *mockStore) DeleteJob(job *model.Job) (deleted bool, err error) {
+	backups, err := s.BackupsForJob(job)
+	if err != nil {
+		return false, err
+	}
+	for _, b := range backups {
+		s.DeleteBackup(&b)
+	}
 	if _, ok := s.jobs[job.ID]; ok {
 		delete(s.jobs, job.ID)
 		deleted = true
@@ -102,6 +111,53 @@ func (s *mockStore) JobsForRemote(remote *model.Remote) (jobs []model.Job, err e
 	for _, j := range s.jobs {
 		if j.RemoteID == remote.ID {
 			v = append(v, j)
+		}
+	}
+	return v, nil
+}
+
+func (s *mockStore) SaveBackup(backup *model.Backup) (created bool, err error) {
+	if _, ok := s.jobs[backup.JobID]; !ok {
+		return false, errors.New("Job not found")
+	}
+	if backup.ID == 0 {
+		s.idCounter++
+		backup.ID = s.idCounter
+		created = true
+	}
+	s.backups[backup.ID] = *backup
+	return created, nil
+}
+
+func (s *mockStore) DeleteBackup(backup *model.Backup) (deleted bool, err error) {
+	if _, ok := s.backups[backup.ID]; ok {
+		delete(s.backups, backup.ID)
+		deleted = true
+	}
+	backup.ID = 0
+	return deleted, nil
+}
+
+func (s *mockStore) Backup(id int64) (backup model.Backup, err error) {
+	if backup, ok := s.backups[id]; ok {
+		return backup, nil
+	}
+	return model.Backup{}, errors.New("Object not found")
+}
+
+func (s *mockStore) Backups() (backups []model.Backup, err error) {
+	v := make([]model.Backup, 0, len(backups))
+	for _, j := range s.backups {
+		v = append(v, j)
+	}
+	return v, nil
+}
+
+func (s *mockStore) BackupsForJob(job *model.Job) (backups []model.Backup, err error) {
+	v := make([]model.Backup, 0, len(backups))
+	for _, b := range s.backups {
+		if b.JobID == job.ID {
+			v = append(v, b)
 		}
 	}
 	return v, nil

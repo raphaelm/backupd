@@ -16,6 +16,8 @@ import (
 func runTestSuite(s datastore.DataStore, t *testing.T) {
 	testRemotes(s, t)
 	testJobs(s, t)
+	testBackups(s, t)
+	testDeleteCascade(s, t)
 }
 
 func testRemotes(s datastore.DataStore, t *testing.T) {
@@ -58,12 +60,8 @@ func testJobs(s datastore.DataStore, t *testing.T) {
 
 	r := model.Remote{Driver: "ssh", Location: "foo"}
 	created, err = s.SaveRemote(&r)
-	assert.Equal(t, true, created)
-	assert.Nil(t, err)
 	r2 := model.Remote{Driver: "ssh", Location: "bar"}
 	created, err = s.SaveRemote(&r2)
-	assert.Equal(t, true, created)
-	assert.Nil(t, err)
 
 	j = model.Job{JobName: "foo", RemoteID: r.ID}
 	created, err = s.SaveJob(&j)
@@ -103,10 +101,65 @@ func testJobs(s datastore.DataStore, t *testing.T) {
 	_, err = s.Job(j.ID)
 	assert.NotNil(t, err)
 
-	testJobDeleteCascade(s, t)
+	s.DeleteRemote(&r)
+	s.DeleteRemote(&r2)
 }
 
-func testJobDeleteCascade(s datastore.DataStore, t *testing.T) {
+func testBackups(s datastore.DataStore, t *testing.T) {
+	// Test only valid JobIDs are accepted
+	b := model.Backup{Result: model.BackupCompleted, JobID: 0}
+	created, err := s.SaveBackup(&b)
+	assert.NotNil(t, err)
+
+	r := model.Remote{Driver: "ssh", Location: "foo"}
+	created, err = s.SaveRemote(&r)
+	j := model.Job{RemoteID: r.ID}
+	created, err = s.SaveJob(&j)
+	j2 := model.Job{RemoteID: r.ID}
+	created, err = s.SaveJob(&j2)
+
+	b = model.Backup{Result: model.BackupCompleted, JobID: j.ID}
+	created, err = s.SaveBackup(&b)
+	assert.Equal(t, true, created)
+	assert.Nil(t, err)
+
+	b2, err := s.Backup(b.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, b.Result, b2.Result)
+	assert.Equal(t, b.ID, b2.ID)
+
+	b2.Result = model.BackupFailed
+	created, err = s.SaveBackup(&b2)
+	assert.Equal(t, false, created)
+	assert.Nil(t, err)
+
+	bslice, err := s.Backups()
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(bslice))
+	assert.Equal(t, b2.Result, bslice[0].Result)
+	assert.Equal(t, b2.ID, bslice[0].ID)
+
+	bslice, err = s.BackupsForJob(&j)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(bslice))
+
+	bslice, err = s.BackupsForJob(&j2)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(bslice))
+
+	s.DeleteBackup(&b2)
+
+	bslice, err = s.Backups()
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(bslice))
+
+	_, err = s.Backup(b.ID)
+	assert.NotNil(t, err)
+
+	s.DeleteRemote(&r)
+}
+
+func testDeleteCascade(s datastore.DataStore, t *testing.T) {
 	r := model.Remote{Driver: "ssh", Location: "foo"}
 	created, err := s.SaveRemote(&r)
 	assert.Equal(t, true, created)
@@ -117,13 +170,26 @@ func testJobDeleteCascade(s datastore.DataStore, t *testing.T) {
 	assert.Equal(t, true, created)
 	assert.Nil(t, err)
 
+	b := model.Backup{Result: model.BackupCompleted, JobID: j.ID}
+	created, err = s.SaveBackup(&b)
+	assert.Equal(t, true, created)
+	assert.Nil(t, err)
+
 	jslice, err := s.Jobs()
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(jslice))
+
+	bslice, err := s.Backups()
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(bslice))
 
 	s.DeleteRemote(&r)
 
 	jslice, err = s.Jobs()
 	assert.Nil(t, err)
 	assert.Equal(t, 0, len(jslice))
+
+	bslice, err = s.Backups()
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(bslice))
 }
