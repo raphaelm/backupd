@@ -19,13 +19,18 @@ func Router(store datastore.DataStore) *mux.Router {
 	r := mux.NewRouter().StrictSlash(true)
 
 	for _, route := range routes {
+		// Function scope hacks
+		// TODO: Do this in an idiomatic way
+		s := store
+		routed := route
+
 		r.
 			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				route.HandlerFunc(store, w, r)
+				routed.HandlerFunc(s, w, r)
 			}))
 	}
 	return r
@@ -33,9 +38,27 @@ func Router(store datastore.DataStore) *mux.Router {
 
 var routes = Routes{
 	Route{
+		"RemoteAdd",
+		"POST",
+		"/remotes",
+		RemoteAdd,
+	},
+	Route{
 		"RemoteIndex",
 		"GET",
 		"/remotes",
 		RemoteIndex,
+	},
+	Route{
+		"RemoteUpdate",
+		"PUT",
+		"/remotes/{id}",
+		RemoteUpdate,
+	},
+	Route{
+		"RemoteDelete",
+		"DELETE",
+		"/remotes/{id}",
+		RemoteDelete,
 	},
 }
