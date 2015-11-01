@@ -8,10 +8,10 @@ const (
 )
 
 type Backup struct {
-	ID     int64
-	JobID  int64
-	Start  time.Time
-	End    time.Time
-	Result int64
-	Log    string
+	ID     int64     `json:"id"`
+	JobID  int64     `json:"job_id"`
+	Start  time.Time `json:"start"`
+	End    time.Time `json:"end"`
+	Result int64     `json:"result"`
+	Log    string    `json:"log"`
 }
