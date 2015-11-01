@@ -7,6 +7,7 @@ all: build
 deps:
 	go get -u "gopkg.in/yaml.v2"
 	go get -u "github.com/stretchr/testify/assert"
+	go get -u "github.com/gorilla/mux"
 
 backupd:
 	cd backupd && go build 
