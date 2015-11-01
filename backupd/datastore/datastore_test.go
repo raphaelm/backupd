@@ -52,39 +52,78 @@ func testRemotes(s datastore.DataStore, t *testing.T) {
 
 func testJobs(s datastore.DataStore, t *testing.T) {
 	// Test only valid RemoteIDs are accepted
-	r := model.Job{JobName: "foo", RemoteId: 1}
-	created, err := s.SaveJob(&r)
+	j := model.Job{JobName: "foo", RemoteID: 0}
+	created, err := s.SaveJob(&j)
+	assert.NotNil(t, err)
+
+	r := model.Remote{Driver: "ssh", Location: "foo"}
+	created, err = s.SaveRemote(&r)
+	assert.Equal(t, true, created)
+	assert.Nil(t, err)
+	r2 := model.Remote{Driver: "ssh", Location: "bar"}
+	created, err = s.SaveRemote(&r2)
 	assert.Equal(t, true, created)
 	assert.Nil(t, err)
 
-	r2, err := s.Job(r.ID)
+	j = model.Job{JobName: "foo", RemoteID: r.ID}
+	created, err = s.SaveJob(&j)
+	assert.Equal(t, true, created)
 	assert.Nil(t, err)
-	assert.Equal(t, r.JobName, r2.JobName)
-	assert.Equal(t, r.ID, r2.ID)
 
-	r2.JobName = "bar"
-	created, err = s.SaveJob(&r2)
+	j2, err := s.Job(j.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, j.JobName, j2.JobName)
+	assert.Equal(t, j.ID, j2.ID)
+
+	j2.JobName = "bar"
+	created, err = s.SaveJob(&j2)
 	assert.Equal(t, false, created)
 	assert.Nil(t, err)
 
-	rslice, err := s.Jobs()
+	jslice, err := s.Jobs()
 	assert.Nil(t, err)
-	assert.Equal(t, 1, len(rslice))
-	assert.Equal(t, r2.JobName, rslice[0].JobName)
-	assert.Equal(t, r2.ID, rslice[0].ID)
+	assert.Equal(t, 1, len(jslice))
+	assert.Equal(t, j2.JobName, jslice[0].JobName)
+	assert.Equal(t, j2.ID, jslice[0].ID)
 
-	s.DeleteJob(&r2)
-
-	rslice, err = s.Jobs()
+	jslice, err = s.JobsForRemote(&r)
 	assert.Nil(t, err)
-	assert.Equal(t, 0, len(rslice))
+	assert.Equal(t, 1, len(jslice))
 
-	_, err = s.Job(r.ID)
+	jslice, err = s.JobsForRemote(&r2)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(jslice))
+
+	s.DeleteJob(&j2)
+
+	jslice, err = s.Jobs()
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(jslice))
+
+	_, err = s.Job(j.ID)
 	assert.NotNil(t, err)
 
 	testJobDeleteCascade(s, t)
 }
 
 func testJobDeleteCascade(s datastore.DataStore, t *testing.T) {
+	r := model.Remote{Driver: "ssh", Location: "foo"}
+	created, err := s.SaveRemote(&r)
+	assert.Equal(t, true, created)
+	assert.Nil(t, err)
 
+	j := model.Job{JobName: "foo", RemoteID: r.ID}
+	created, err = s.SaveJob(&j)
+	assert.Equal(t, true, created)
+	assert.Nil(t, err)
+
+	jslice, err := s.Jobs()
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(jslice))
+
+	s.DeleteRemote(&r)
+
+	jslice, err = s.Jobs()
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(jslice))
 }

@@ -12,4 +12,6 @@ type DataStore interface {
 	Jobs() (jobs []model.Job, err error)
 	SaveJob(job *model.Job) (created bool, err error)
 	DeleteJob(job *model.Job) (deleted bool, err error)
+
+	JobsForRemote(remote *model.Remote) (jobs []model.Job, err error)
 }

@@ -9,7 +9,7 @@ const (
 
 type Backup struct {
 	ID     int64
-	JobId  int64
+	JobID  int64
 	Start  time.Time
 	End    time.Time
 	Result int64

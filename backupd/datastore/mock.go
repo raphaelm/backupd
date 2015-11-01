@@ -30,6 +30,13 @@ func (s *mockStore) SaveRemote(remote *model.Remote) (created bool, err error) {
 }
 
 func (s *mockStore) DeleteRemote(remote *model.Remote) (deleted bool, err error) {
+	jobs, err := s.JobsForRemote(remote)
+	if err != nil {
+		return false, err
+	}
+	for _, j := range jobs {
+		s.DeleteJob(&j)
+	}
 	if _, ok := s.remotes[remote.ID]; ok {
 		delete(s.remotes, remote.ID)
 		deleted = true
@@ -54,6 +61,9 @@ func (s *mockStore) Remotes() (remotes []model.Remote, err error) {
 }
 
 func (s *mockStore) SaveJob(job *model.Job) (created bool, err error) {
+	if _, ok := s.remotes[job.RemoteID]; !ok {
+		return false, errors.New("Remote not found")
+	}
 	if job.ID == 0 {
 		s.idCounter++
 		job.ID = s.idCounter
@@ -81,8 +91,18 @@ func (s *mockStore) Job(id int64) (job model.Job, err error) {
 
 func (s *mockStore) Jobs() (jobs []model.Job, err error) {
 	v := make([]model.Job, 0, len(jobs))
-	for _, r := range s.jobs {
-		v = append(v, r)
+	for _, j := range s.jobs {
+		v = append(v, j)
+	}
+	return v, nil
+}
+
+func (s *mockStore) JobsForRemote(remote *model.Remote) (jobs []model.Job, err error) {
+	v := make([]model.Job, 0, len(jobs))
+	for _, j := range s.jobs {
+		if j.RemoteID == remote.ID {
+			v = append(v, j)
+		}
 	}
 	return v, nil
 }
