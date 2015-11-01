@@ -5,3 +5,5 @@ type Remote struct {
 	Driver   string `json:"driver"`
 	Location string `json:"location"`
 }
+
+type Remotes []Remote

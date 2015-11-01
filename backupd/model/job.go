@@ -9,3 +9,4 @@ type Job struct {
 	Interval      time.Duration `json:"interval"`
 	PreferredTime time.Time     `json:"preferred_time"`
 }
+type Jobs []Job

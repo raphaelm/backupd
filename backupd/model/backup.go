@@ -15,3 +15,5 @@ type Backup struct {
 	Result int64     `json:"result"`
 	Log    string    `json:"log"`
 }
+
+type Backups []Backup

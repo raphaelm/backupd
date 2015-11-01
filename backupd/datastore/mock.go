@@ -54,7 +54,7 @@ func (s *mockStore) Remote(id int64) (remote model.Remote, err error) {
 	return model.Remote{}, errors.New("Object not found")
 }
 
-func (s *mockStore) Remotes() (remotes []model.Remote, err error) {
+func (s *mockStore) Remotes() (remotes model.Remotes, err error) {
 	v := make([]model.Remote, 0, len(remotes))
 	for _, r := range s.remotes {
 		v = append(v, r)
@@ -98,7 +98,7 @@ func (s *mockStore) Job(id int64) (job model.Job, err error) {
 	return model.Job{}, errors.New("Object not found")
 }
 
-func (s *mockStore) Jobs() (jobs []model.Job, err error) {
+func (s *mockStore) Jobs() (jobs model.Jobs, err error) {
 	v := make([]model.Job, 0, len(jobs))
 	for _, j := range s.jobs {
 		v = append(v, j)
@@ -106,7 +106,7 @@ func (s *mockStore) Jobs() (jobs []model.Job, err error) {
 	return v, nil
 }
 
-func (s *mockStore) JobsForRemote(remote *model.Remote) (jobs []model.Job, err error) {
+func (s *mockStore) JobsForRemote(remote *model.Remote) (jobs model.Jobs, err error) {
 	v := make([]model.Job, 0, len(jobs))
 	for _, j := range s.jobs {
 		if j.RemoteID == remote.ID {
@@ -145,7 +145,7 @@ func (s *mockStore) Backup(id int64) (backup model.Backup, err error) {
 	return model.Backup{}, errors.New("Object not found")
 }
 
-func (s *mockStore) Backups() (backups []model.Backup, err error) {
+func (s *mockStore) Backups() (backups model.Backups, err error) {
 	v := make([]model.Backup, 0, len(backups))
 	for _, j := range s.backups {
 		v = append(v, j)
@@ -153,7 +153,7 @@ func (s *mockStore) Backups() (backups []model.Backup, err error) {
 	return v, nil
 }
 
-func (s *mockStore) BackupsForJob(job *model.Job) (backups []model.Backup, err error) {
+func (s *mockStore) BackupsForJob(job *model.Job) (backups model.Backups, err error) {
 	v := make([]model.Backup, 0, len(backups))
 	for _, b := range s.backups {
 		if b.JobID == job.ID {
