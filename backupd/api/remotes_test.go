@@ -3,30 +3,14 @@ package api_test
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"log"
 	"net/http"
-	"net/http/httptest"
 	"strconv"
 	"strings"
 	"testing"
 
-	"github.com/raphaelm/backupd/backupd/api"
-	"github.com/raphaelm/backupd/backupd/datastore"
 	"github.com/raphaelm/backupd/backupd/model"
 	"github.com/stretchr/testify/assert"
 )
-
-var (
-	server *httptest.Server
-	store  datastore.DataStore
-	reader io.Reader
-)
-
-func init() {
-	store = datastore.MockStore()
-	server = httptest.NewServer(api.Router(store))
-}
 
 func TestRemotes(t *testing.T) {
 	// Fetch list of remotes
@@ -77,7 +61,5 @@ func TestRemotes(t *testing.T) {
 	}
 	assert.Equal(t, 200, res.StatusCode)
 	rslice, err = store.Remotes()
-	log.Println(rslice)
 	assert.Equal(t, 0, len(rslice))
-
 }

@@ -61,4 +61,28 @@ var routes = Routes{
 		"/remotes/{id}",
 		RemoteDelete,
 	},
+	Route{
+		"JobAdd",
+		"POST",
+		"/jobs",
+		JobAdd,
+	},
+	Route{
+		"JobIndex",
+		"GET",
+		"/jobs",
+		JobIndex,
+	},
+	Route{
+		"JobUpdate",
+		"PUT",
+		"/jobs/{id}",
+		JobUpdate,
+	},
+	Route{
+		"JobDelete",
+		"DELETE",
+		"/jobs/{id}",
+		JobDelete,
+	},
 }
