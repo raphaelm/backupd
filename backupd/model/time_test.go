@@ -7,11 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestJson(t *testing.T) {
+func TestClock(t *testing.T) {
 	ct := model.ClockTime{}
 	assert.Nil(t, ct.UnmarshalJSON([]byte(`"13:37"`)))
-	assert.Equal(t, 13, ct.Hour())
-	assert.Equal(t, 37, ct.Minute())
+	assert.Equal(t, 13, ct.Hour)
+	assert.Equal(t, 37, ct.Minute)
 	out, err := ct.MarshalJSON()
 	assert.Nil(t, err)
 	assert.Equal(t, []byte(`"13:37"`), out)
@@ -19,7 +19,7 @@ func TestJson(t *testing.T) {
 	assert.NotNil(t, ct.UnmarshalJSON([]byte(`"13:XX`)))
 	assert.NotNil(t, ct.UnmarshalJSON([]byte(`"13:70"`)))
 
-	ct = model.NewClockTime(22, 42)
-	assert.Equal(t, 22, ct.Hour())
-	assert.Equal(t, 42, ct.Minute())
+	ct = model.ClockTime{Hour: 22, Minute: 42}
+	assert.Equal(t, 22, ct.Hour)
+	assert.Equal(t, 42, ct.Minute)
 }

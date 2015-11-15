@@ -16,7 +16,7 @@ func TestSimpleAddition(t *testing.T) {
 
 	job := model.Job{
 		Interval:      time.Duration(1 * time.Hour),
-		PreferredTime: model.NewClockTime(2, 0),
+		PreferredTime: model.ClockTime{Hour: 2},
 	}
 	last := model.Backup{
 		Start:  time.Date(2015, 10, 29, 13, 50, 0, 0, time.UTC),
@@ -30,7 +30,7 @@ func TestSimpleAddition(t *testing.T) {
 func TestOnlyInFuture(t *testing.T) {
 	job := model.Job{
 		Interval:      time.Duration(1 * time.Hour),
-		PreferredTime: model.NewClockTime(2, 0),
+		PreferredTime: model.ClockTime{Hour: 2},
 	}
 	last := model.Backup{
 		Start:  time.Date(2015, 10, 29, 11, 50, 0, 0, time.UTC),
@@ -44,7 +44,7 @@ func TestOnlyInFuture(t *testing.T) {
 func TestPreferredTimeInPast(t *testing.T) {
 	job := model.Job{
 		Interval:      time.Duration(3 * time.Hour),
-		PreferredTime: model.NewClockTime(13, 55),
+		PreferredTime: model.ClockTime{Hour: 13, Minute: 55},
 	}
 	last := model.Backup{
 		Start:  time.Date(2015, 10, 29, 13, 50, 0, 0, time.UTC),
@@ -58,7 +58,7 @@ func TestPreferredTimeInPast(t *testing.T) {
 func TestPreferredTime(t *testing.T) {
 	job := model.Job{
 		Interval:      time.Duration(3 * time.Hour),
-		PreferredTime: model.NewClockTime(15, 0),
+		PreferredTime: model.ClockTime{Hour: 15},
 	}
 	last := model.Backup{
 		Start:  time.Date(2015, 10, 29, 13, 50, 0, 0, time.UTC),
@@ -72,7 +72,7 @@ func TestPreferredTime(t *testing.T) {
 func TestErroredRetry(t *testing.T) {
 	job := model.Job{
 		Interval:      time.Duration(3 * time.Hour),
-		PreferredTime: model.NewClockTime(15, 0),
+		PreferredTime: model.ClockTime{Hour: 15},
 	}
 	last := model.Backup{
 		Start:  time.Date(2015, 10, 29, 13, 50, 0, 0, time.UTC),
@@ -86,7 +86,7 @@ func TestErroredRetry(t *testing.T) {
 func TestErroredRetryAtPreferredTime(t *testing.T) {
 	job := model.Job{
 		Interval:      time.Duration(3 * time.Hour),
-		PreferredTime: model.NewClockTime(14, 0),
+		PreferredTime: model.ClockTime{Hour: 14},
 	}
 	last := model.Backup{
 		Start:  time.Date(2015, 10, 29, 13, 50, 0, 0, time.UTC),
@@ -100,7 +100,7 @@ func TestErroredRetryAtPreferredTime(t *testing.T) {
 func TestRelToNow(t *testing.T) {
 	job := model.Job{
 		Interval:      time.Duration(time.Hour),
-		PreferredTime: model.NewClockTime(time.Now().Hour() - 5, 0),
+		PreferredTime: model.ClockTime{Hour: time.Now().Hour() - 5},
 	}
 	last := model.Backup{
 		Start:  time.Now().Add(time.Duration(-20 * time.Minute)),

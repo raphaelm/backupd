@@ -27,8 +27,7 @@ func NextDateRelative(job model.Job, lastBackup model.Backup, now time.Time) tim
 	}
 
 	preferredOnNextDay := time.Date(nextTime.Year(), nextTime.Month(), nextTime.Day(),
-		job.PreferredTime.Hour(), job.PreferredTime.Minute(), job.PreferredTime.Second(),
-		0, time.UTC)
+		job.PreferredTime.Hour, job.PreferredTime.Minute, 0, 0, time.UTC)
 
 	if lastTime.Before(preferredOnNextDay) && nextTime.After(preferredOnNextDay) {
 		nextTime = preferredOnNextDay

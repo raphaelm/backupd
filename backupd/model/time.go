@@ -9,11 +9,15 @@ var timeLayout = "15:04"
 var TimeParseError = errors.New(`TimeParseError: should be a string formatted as "15:04:05"`)
 
 type ClockTime struct {
-	time.Time
+	Hour, Minute int
+}
+
+func (t ClockTime) toTime() time.Time {
+	return time.Date(0, 0, 0, t.Hour, t.Minute, 0, 0, time.UTC)
 }
 
 func (t ClockTime) MarshalJSON() ([]byte, error) {
-	return []byte(`"` + t.Format(timeLayout) + `"`), nil
+	return []byte(`"` + t.toTime().Format(timeLayout) + `"`), nil
 }
 
 func (t *ClockTime) UnmarshalJSON(b []byte) error {
@@ -26,12 +30,7 @@ func (t *ClockTime) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	t.Time = ret
+	t.Hour = ret.Hour()
+	t.Minute = ret.Minute()
 	return nil
-}
-
-func NewClockTime(hour, minute int) ClockTime {
-	return ClockTime{
-		Time: time.Date(0, 0, 0, hour, minute, 0, 0, time.UTC),
-	}
 }
