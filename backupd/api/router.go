@@ -85,4 +85,10 @@ var routes = Routes{
 		"/jobs/{id}",
 		JobDelete,
 	},
+	Route{
+		"BackupIndex",
+		"GET",
+		"/backups",
+		BackupIndex,
+	},
 }

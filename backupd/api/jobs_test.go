@@ -28,7 +28,7 @@ func TestJobs(t *testing.T) {
 	assert.Equal(t, 500, res.StatusCode)
 
 	j := model.Job{
-		RemoteID:      1,
+		RemoteID:      remote.ID,
 		JobName:       "mysql",
 		Interval:      time.Duration(20 * time.Minute),
 		PreferredTime: model.ClockTime{Hour: 3, Minute: 0},
