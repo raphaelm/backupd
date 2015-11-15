@@ -26,3 +26,7 @@ _testmain.go
 # Editor files
 *.swp
 ~*
+
+# Binaries
+backupd/backupd
+backupexporter/backupexporter
