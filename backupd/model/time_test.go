@@ -18,4 +18,8 @@ func TestJson(t *testing.T) {
 
 	assert.NotNil(t, ct.UnmarshalJSON([]byte(`"13:XX`)))
 	assert.NotNil(t, ct.UnmarshalJSON([]byte(`"13:70"`)))
+
+	ct = model.NewClockTime(22, 42)
+	assert.Equal(t, 22, ct.Hour())
+	assert.Equal(t, 42, ct.Minute())
 }

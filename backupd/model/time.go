@@ -29,3 +29,9 @@ func (t *ClockTime) UnmarshalJSON(b []byte) error {
 	t.Time = ret
 	return nil
 }
+
+func NewClockTime(hour, minute int) ClockTime {
+	return ClockTime{
+		Time: time.Date(0, 0, 0, hour, minute, 0, 0, time.UTC),
+	}
+}
